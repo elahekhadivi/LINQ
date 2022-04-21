@@ -48,18 +48,43 @@ List<Order> orders = new List<Order>()
 
             };
 
- //Query 1
-foreach(var customer in customers.OrderBy(c =>c.Last))
-{
-    Console.WriteLine(customer.First + " " + customer.Last);
-    foreach(var order in orders.OrderByDescending(p => p.Price))
-    {
 
-        Console.WriteLine(order.Price + " "+order.Description +" "+ order.Quantity);
+
+foreach (var customer in customers.OrderBy(c => c.Last))
+{
+    Console.WriteLine("\n ----------------------- " + customer.First + " " + customer.Last + " ----------------------- ");
+    foreach (var order in orders.Where(o => o.CustomerID == customer.ID).OrderByDescending(p => p.Price))
+    {
+        Console.WriteLine($"{order.Description},{order.Price},{order.Quantity}");
     }
-    orders.Count();
-    Console.WriteLine($"Total orders {orders.Count}");
+}
+Console.WriteLine($"The total number of orders : {orders.Count}");
+Console.WriteLine($"The total number of orders $500 and under: {orders.Where(o => o.Price <= 500).Count()}");
+Console.WriteLine($"The total number of orders over $500 : {orders.Where(o => o.Price > 500).Count()}");
+Console.WriteLine($"The total cost of all orders : {orders.Sum(o => o.Price)}");
+Console.WriteLine($"The 3 least expensive products: ");
+
+var sumUnder30 = (from order in orders
+             join customer in customers
+                  on order.CustomerID equals customer.ID
+             where customer.Age <= 30
+             select order.Price).Sum();
+Console.WriteLine($"Total cost for all orders for people 30 or under : {sumUnder30}");
+
+var sumOver30 = (from order in orders
+             join customer in customers
+                  on order.CustomerID equals customer.ID
+             where customer.Age > 30
+             select order.Price).Sum();
+Console.WriteLine($"Total cost for all orders for people over 30 : {sumOver30}");
+
+foreach (var order in orders.DistinctBy(o=>o.Price).OrderBy(o => o.Price).Take(3))
+{
+    Console.WriteLine($"{order.Description} , {order.Price}");
 }
 
-
-
+Console.WriteLine($"The 3 most expensive products: ");
+foreach (var order in orders.DistinctBy(o => o.Price).OrderByDescending(o => o.Price).Take(3))
+{
+    Console.WriteLine($"{order.Description} , {order.Price}");
+}
